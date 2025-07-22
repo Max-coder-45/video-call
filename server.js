@@ -1,21 +1,26 @@
 const express = require('express');
-const { ExpressPeerServer } = require('peer');
-const path = require('path');
-
 const app = express();
-const server = require('http').Server(app);
+const http = require('http');
+const { Server } = require('socket.io');
+const { ExpressPeerServer } = require('peer');
+
+const server = http.createServer(app);
+const io = new Server(server);
 const peerServer = ExpressPeerServer(server, {
-  debug: true
+  debug: true,
+  path: '/'
 });
 
 app.use('/peerjs', peerServer);
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+  res.sendFile(__dirname + '/index.html');
 });
 
-const PORT = process.env.PORT || 3000;
+app.use('/js', express.static(__dirname + '/js'));
+app.use('/css', express.static(__dirname + '/css'));
+
+const PORT = process.env.PORT || 10000;
 server.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
